@@ -104,11 +104,17 @@ function init(simon) {
   simon.sequence = [];
   simon.userClickCount = 0;
   simon.round = 1;
+
+  updateRound(simon);
+  generateSequence(simon, 3);
+  showSequence(simon);
+  
+  // We will add more things later
 } 
 
 
 function updateRound(simon) {
-  console.log()
+  console.log("FUNCTION updateRound");
 }
 
 function generateSequence(simon) {
@@ -126,7 +132,7 @@ function checkUserInput(simon) {
 
 ### `updateRound` function
 
-It will show the current round to the user. To do that, we have to select the span with ID `counter` and update its text. The value we are going to use is the one we have stored in `this.round`.
+It will show the current round to the user. To do that, we have to select the span with ID `counter` and update its text. The value we are going to use is the one we have stored in `simon.round`.
 
 ```
 jQuery
@@ -161,13 +167,19 @@ What a loop is
 A loop is a piece of code which helps us execute several times the same code.
 ```
 
-To finish up this function, we need to pick up a random color from the `colors` global variable. To do that, we are going to create a new `generateRandom` function to generate a random number. Once we generate this random number, we are going to add it inside the `sequence` through `this.sequence`.
+To finish up this function, we need to pick up a random color from the `colors` global variable. To do that, we are going to create a new `generateRandom` function to generate a random number. Once we generate this random number, we are going to add it inside the `sequence` through `simon.sequence`.
 
-```
-What `this` is
 
-At this point, the real meaning of the reserved word `this` is difficult to understand, so we are going to keep it super simple (KISS principle in Software Engineering). `this` allow us to share information among the different functions that we have inside our game.
+This is what your `generateSequence` could look like
+```js
+function generateSequence(simon, quantity) {
+  for (var i = 0; i < quantity; i++) {
+    var generatedColor = colors[generateRandom()];
+    simon.sequence.push(generatedColor);
+  }
+}
 ```
+
 
 ### `generateRandom` function
 
@@ -182,6 +194,14 @@ Some functions execute an independent action (like changing a text in the HTML).
 
 🤯 🤯 🤯
 ```
+
+A possible `generateRandom` function.
+```js
+function generateRandom() {
+  return Math.floor(Math.random() * 4);
+}
+```
+
 
 ### `showSequence` function
 
@@ -202,7 +222,7 @@ A `setInterval` allow us to execute, for a certain amount of milliseconds, the s
 We are going to use a conditional to execute different code, based on the current element of the sequence that we are showing. We are going to stop the interval when the current item, `i`, has the same value than the sequence's length.
 
 ```
-What a coinditional is
+What a conditional is
 
 A conditional (`if...else`) allow us to compare two values and execute a certain code depending on the value of this comparisson, which can be `true` or `false`.
 ```
@@ -236,24 +256,43 @@ A `setTimeout` allow us to execute a code just once after a certain amount of ti
 
 If we have survived to this function, nothing will scare us. From now on, things are much more easier, so congratulations for being here 🎉 🎉
 
+The is the solution:
+```js
+function showSequence(simon) {
+  $("#simon").addClass("blocked");
+  var i = 0;
+  var interval = setInterval(function() {
+    $(".btn").removeClass("active");
+
+    if (i < simon.sequence.length) {
+      $(".btn-" + simon.sequence[i]).addClass("active");
+    } else {
+      console.log("BLOCKED");
+      $("#simon").removeClass("blocked");
+      clearInterval(interval);
+    }
+
+    setTimeout(function() {
+      $(".btn").removeClass("active");
+    }, 700);
+
+    i++;
+  }, 1000);
+}
+```
+
 ### `checkUserInput` function
 
 We are going to create a `checkUserInput` function, and we are going to bind it to all the buttons with the `btn` class. We are going to do that inside the `init` function, by adding the following code:
 
 ```
 $(".btn").unbind("click");
-$(".btn").bind("click", this.checkUserInput);
+$(".btn").on("click", function() { checkUserInput(simon, this)} );
 ```
 
-`click` is an event. It means that it will be executed when the player does a certain action, `click` over the button in this case. Sooo... maybe there's something else we should worry about. Inside this function, `this` is not `this` anymore.
+`click` is an event. It means that it will be executed when the player does a certain action, `click` over the button in this case. Sooo... maybe there's something else we should worry about.
 
-Inside an event, `this` references the event that is executing this function, and not the game anymore. Thanks God, we can define inside our game definition, just before the `init` function, the following:
-
-```
-var self = this;
-```
-
-Problem solved, from now on, inside the `checkUserInput` function, `self` references our old `this`, which allow us to access all the information inside the event. It means that our sequence is not in `this.sequence` but in `self.sequence`. This is called Scope.
+Inside an event, `this` references the event that is executing this function. Thanks God, we can define inside our game definition, just before the `init` function, the following:
 
 Once we have understood this, we can proceed with the behaviour. This function will be called every time the user clicks on a button. We have to capture the clicked button and check out its value with the current element of the sequence (remember we have a `userClickCount` element that allow us know which element of the sequence we have to compare it with).
 
@@ -273,12 +312,14 @@ Once the player has finished one round, we need to do a couple of things:
 
 You may be thinking why we have been creating all these functions among the game. A function allow us to reuse code, so now we can take profit of all this functions by calling all of them as follows:
 
-```
-this.generateSequence(1);
-this.showSequence();
-this.userClickCount = 0;
-this.round++;
-this.updateRound();
+```js
+function finishedRound (simon) {
+  generateSequence(simon, 1);
+  showSequence(simon);
+  simon.userClickCount = 0;
+  simon.round++;
+  updateRound(simon);
+}
 ```
 
 **How easy is to generate a new round with all our functions!! 😍 😍 😍**
@@ -306,4 +347,4 @@ I hope you have had fun and you have learned some of the basics of coding with J
 
 Thanks!
 
-Made with <3 by @Lluisarevalo
+Made with <3 by @Lluisarevalo from Ironhack

@@ -15,8 +15,7 @@ function init(simon) {
   simon.sequence = [];
   simon.userClickCount = 0;
   simon.round = 1;
-
-  // Added
+  
   updateRound(simon);
   generateSequence(simon, 3);
   showSequence(simon);
